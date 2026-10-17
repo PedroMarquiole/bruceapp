@@ -113,7 +113,10 @@ Deno.serve(async (req) => {
 
   // Envio de teste pedido pelo usuário.
   if (testUserId) {
-    const { data: subs } = await admin.from('push_subscriptions').select('*').eq('user_id', testUserId)
+    const { data: subs } = await admin
+      .from('push_subscriptions')
+      .select('*')
+      .eq('user_id', testUserId)
     let ok = 0
     for (const s of (subs ?? []) as Sub[]) {
       if (
