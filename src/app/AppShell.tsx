@@ -1,13 +1,16 @@
 import { Outlet, ScrollRestoration } from 'react-router'
 import { TabBar } from '../ui/TabBar'
 import { AuthGate } from '../features/auth/AuthGate'
+import { PinLock } from '../features/settings/PinLock'
 
 /** Tudo que exige login passa por aqui. */
 export function AuthedLayout() {
   return (
     <AuthGate>
-      <Outlet />
-      <ScrollRestoration />
+      <PinLock>
+        <Outlet />
+        <ScrollRestoration />
+      </PinLock>
     </AuthGate>
   )
 }

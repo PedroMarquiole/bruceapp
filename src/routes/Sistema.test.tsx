@@ -3,11 +3,13 @@ import { act, fireEvent, screen } from '@testing-library/react'
 import { renderRoute } from '../test/render'
 
 describe('Sistema visual', () => {
-  it('passa do erro para carregando e depois para vazio ao tentar de novo', () => {
-    vi.useFakeTimers()
+  it('passa do erro para carregando e depois para vazio ao tentar de novo', async () => {
     renderRoute('/perfil/sistema')
-    expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível carregar o histórico')
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Não foi possível carregar o histórico',
+    )
 
+    vi.useFakeTimers()
     fireEvent.click(screen.getByRole('button', { name: 'Tentar de novo' }))
     expect(screen.getByRole('status')).toHaveTextContent('Carregando histórico')
 
@@ -18,10 +20,10 @@ describe('Sistema visual', () => {
     vi.useRealTimers()
   })
 
-  it('botão principal mostra ocupado e depois confirma o salvamento', () => {
-    vi.useFakeTimers()
+  it('botão principal mostra ocupado e depois confirma o salvamento', async () => {
     renderRoute('/perfil/sistema')
-    const salvar = screen.getByRole('button', { name: 'Salvar treino' })
+    const salvar = await screen.findByRole('button', { name: 'Salvar treino' })
+    vi.useFakeTimers()
     fireEvent.click(salvar)
     expect(salvar).toBeDisabled()
     act(() => {

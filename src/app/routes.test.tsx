@@ -20,16 +20,16 @@ describe('navegação principal', () => {
     const user = userEvent.setup()
     const router = renderAt('/')
     await user.click(screen.getByRole('link', { name: /Treino/ }))
+    expect(await screen.findByRole('heading', { level: 1, name: 'Treino' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/treino')
-    expect(screen.getByRole('heading', { level: 1, name: 'Treino' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Treino/ })).toHaveAttribute('aria-current', 'page')
   })
 
   it('abre o perfil pelo botão do topo', async () => {
     const user = userEvent.setup()
     renderAt('/evolucao')
-    await user.click(screen.getByRole('link', { name: 'Abrir perfil e configurações' }))
-    expect(screen.getByRole('heading', { level: 1, name: 'Perfil' })).toBeInTheDocument()
+    await user.click(await screen.findByRole('link', { name: 'Abrir perfil e configurações' }))
+    expect(await screen.findByRole('heading', { level: 1, name: 'Perfil' })).toBeInTheDocument()
   })
 
   it('mostra tela de não encontrado para endereço desconhecido', () => {
@@ -57,9 +57,9 @@ describe('estados vazios', () => {
 })
 
 describe('acesso', () => {
-  it('sem sessão, mostra a tela de entrada em vez do app', () => {
+  it('sem sessão, mostra a tela de entrada em vez do app', async () => {
     renderRoute('/treino', fakeAuth({ status: 'deslogado' }))
-    expect(screen.getByRole('heading', { level: 1, name: 'Entrar' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Entrar' })).toBeInTheDocument()
     expect(screen.queryByRole('navigation', { name: 'Navegação principal' })).toBeNull()
   })
 
@@ -72,7 +72,7 @@ describe('acesso', () => {
   it('perfil mostra o e-mail da conta e permite sair', async () => {
     const user = userEvent.setup()
     const { api } = renderRoute('/perfil')
-    expect(screen.getByText('eu@teste.invalid')).toBeInTheDocument()
+    expect(await screen.findByText('eu@teste.invalid')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Sair' }))
     expect(api.signOut).toHaveBeenCalledOnce()
   })

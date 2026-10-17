@@ -10,6 +10,7 @@ const telas = [
   { path: '/perfil/sistema', heading: 'Sistema visual', nome: 'sistema' },
   { path: '/habitos', heading: 'Hábitos', nome: 'habitos' },
   { path: '/treino/exercicios', heading: 'Exercícios', nome: 'exercicios' },
+  { path: '/missoes', heading: 'Missões', nome: 'missoes' },
 ] as const
 
 for (const tela of telas) {

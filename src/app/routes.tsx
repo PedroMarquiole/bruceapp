@@ -1,18 +1,12 @@
+import type { ComponentType } from 'react'
 import type { RouteObject } from 'react-router'
 import { AppShell, AuthedLayout } from './AppShell'
 import { Hoje } from '../routes/Hoje'
-import { Nutricao } from '../routes/Nutricao'
-import { Treino } from '../routes/treino/Treino'
-import { PlanoEditor } from '../routes/treino/PlanoEditor'
-import { Exercicios } from '../routes/treino/Exercicios'
-import { Sessao } from '../routes/treino/Sessao'
-import { Evolucao } from '../routes/Evolucao'
-import { Bruce } from '../routes/Bruce'
-import { Perfil } from '../routes/Perfil'
-import { Sistema } from '../routes/Sistema'
-import { Habitos } from '../routes/Habitos'
 import { BoasVindas } from '../routes/BoasVindas'
 import { RouteError } from '../routes/RouteError'
+
+/** Telas fora de Hoje carregam sob demanda, para a primeira abertura ser rápida. */
+const page = (load: () => Promise<{ Component: ComponentType }>) => ({ lazy: load })
 
 export const routes: RouteObject[] = [
   {
@@ -24,16 +18,54 @@ export const routes: RouteObject[] = [
         element: <AppShell />,
         children: [
           { index: true, element: <Hoje /> },
-          { path: 'nutricao', element: <Nutricao /> },
-          { path: 'treino', element: <Treino /> },
-          { path: 'treino/planos/:id', element: <PlanoEditor /> },
-          { path: 'treino/exercicios', element: <Exercicios /> },
-          { path: 'treino/sessao/:id', element: <Sessao /> },
-          { path: 'evolucao', element: <Evolucao /> },
-          { path: 'bruce', element: <Bruce /> },
-          { path: 'habitos', element: <Habitos /> },
-          { path: 'perfil', element: <Perfil /> },
-          { path: 'perfil/sistema', element: <Sistema /> },
+          {
+            path: 'nutricao',
+            ...page(() => import('../routes/Nutricao').then((m) => ({ Component: m.Nutricao }))),
+          },
+          {
+            path: 'treino',
+            ...page(() => import('../routes/treino/Treino').then((m) => ({ Component: m.Treino }))),
+          },
+          {
+            path: 'treino/planos/:id',
+            ...page(() =>
+              import('../routes/treino/PlanoEditor').then((m) => ({ Component: m.PlanoEditor })),
+            ),
+          },
+          {
+            path: 'treino/exercicios',
+            ...page(() =>
+              import('../routes/treino/Exercicios').then((m) => ({ Component: m.Exercicios })),
+            ),
+          },
+          {
+            path: 'treino/sessao/:id',
+            ...page(() => import('../routes/treino/Sessao').then((m) => ({ Component: m.Sessao }))),
+          },
+          {
+            path: 'evolucao',
+            ...page(() => import('../routes/Evolucao').then((m) => ({ Component: m.Evolucao }))),
+          },
+          {
+            path: 'bruce',
+            ...page(() => import('../routes/Bruce').then((m) => ({ Component: m.Bruce }))),
+          },
+          {
+            path: 'habitos',
+            ...page(() => import('../routes/Habitos').then((m) => ({ Component: m.Habitos }))),
+          },
+          {
+            path: 'missoes',
+            ...page(() => import('../routes/Missoes').then((m) => ({ Component: m.Missoes }))),
+          },
+          {
+            path: 'perfil',
+            ...page(() => import('../routes/Perfil').then((m) => ({ Component: m.Perfil }))),
+          },
+          {
+            path: 'perfil/sistema',
+            ...page(() => import('../routes/Sistema').then((m) => ({ Component: m.Sistema }))),
+          },
         ],
       },
     ],

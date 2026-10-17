@@ -22,6 +22,7 @@ import { formatDuration } from '../features/workouts/domain/sets'
 import { useDiary } from '../features/nutrition/queries'
 import { fmt, sumEntries } from '../features/nutrition/domain/nutrients'
 import { BruceSuggestion } from '../features/assistant/BruceSuggestion'
+import { MissionsSummary } from '../features/gamification/MissionsSummary'
 import { CalendarCheck2, Dumbbell } from 'lucide-react'
 
 export function Hoje({ now: fixedNow }: { now?: Date }) {
@@ -230,6 +231,8 @@ export function Hoje({ now: fixedNow }: { now?: Date }) {
             </p>
           )}
         </Section>
+
+        <MissionsSummary now={now} />
 
         <BruceSuggestion />
       </div>

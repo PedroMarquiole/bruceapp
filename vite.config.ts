@@ -38,9 +38,28 @@ export default defineConfig({
         navigateFallback: '/index.html',
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         cleanupOutdatedCaches: true,
+        // Recebe e mostra as notificações de lembrete (Web Push).
+        importScripts: ['push-sw.js'],
       },
     }),
   ],
+  build: {
+    rolldownOptions: {
+      output: {
+        // Bibliotecas grandes em arquivos próprios: mudam pouco e ficam em cache entre versões.
+        advancedChunks: {
+          groups: [
+            { name: 'supabase', test: /node_modules[\\/]@supabase/ },
+            {
+              name: 'react',
+              test: /node_modules[\\/](react|react-dom|react-router|scheduler)[\\/]/,
+            },
+            { name: 'query', test: /node_modules[\\/](@tanstack|zod)[\\/]/ },
+          ],
+        },
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
