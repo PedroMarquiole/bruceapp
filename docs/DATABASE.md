@@ -1,8 +1,7 @@
 # Banco de dados
 
 Supabase (Postgres 17), projeto `bruceapp`, região São Paulo (`sa-east-1`). Migrations em
-`supabase/migrations/`, aplicadas em ordem pelo nome. Estado: **Implementado** (Fase 2), salvo
-onde indicado.
+`supabase/migrations/`, aplicadas em ordem pelo nome. Estado: **Implementado** (Fases 2 a 5).
 
 ## Regras gerais
 
@@ -35,26 +34,42 @@ onde indicado.
 | `body_measurements`                                              | Peso e medidas               | Tipos fixos; unidade `kg`, `cm` ou `%`                                                                                                                     |
 | `personal_records`                                               | Recordes                     | Critérios: carga para 1, 3, 5, 10 repetições e 1RM estimado                                                                                                |
 
+| `ai_conversations`, `ai_messages` | Conversas com o Bruce | Propostas da IA ficam na mensagem e só viram registro quando o usuário aceita |
+| `ai_usage` | Contagem e custo da IA | Sem conteúdo; usada para o limite diário (padrão 40 pedidos) |
+| `progress_photos` | Fotos de evolução | Arquivo no bucket privado `progress-photos`, pasta do dono; exibida por URL assinada curta |
+| `points_ledger` | Extrato de pontos | Só gatilhos `SECURITY DEFINER` escrevem; único por `(user_id, rule, source_key)`; desfazer a ação apaga a linha |
+| `push_subscriptions` | Aparelhos com notificação | Único por endpoint; removida automaticamente quando o serviço de push responde 404/410 |
+
 Esquema privado `app_private` (não exposto pela API): `allowed_emails`, a lista de e-mails que
 podem criar conta, e as funções dos gatilhos de conta.
 
-## Planejado
+## Funções e gatilhos
 
-| Tabelas                                                                                     | Fase |
-| ------------------------------------------------------------------------------------------- | ---- |
-| `meal_templates`, `meal_template_items` (refeições salvas)                                  | 3    |
-| `ai_conversations`, `ai_messages`, `ai_usage`                                               | 4    |
-| `progress_photos` + bucket privado                                                          | 4    |
-| `missions`, `achievements`, `user_achievements`, `points_ledger` (único por regra e origem) | 5    |
-| `push_subscriptions`                                                                        | 5    |
+- `finish_workout_session(session_id)`: finaliza a sessão e calcula recordes (carga para 1, 3, 5 e
+  10 repetições; 1RM estimado por Epley para 2–12 repetições, marcado como estimativa).
+- Pontos (`20261017050000_pontos.sql`): hábito cumprido no dia +10, treino finalizado +50, primeiro
+  registro alimentar do dia +5, primeira medida do dia +5, recorde +20. Nível = ⌊√(pontos/50)⌋ + 1.
+  Dia perdido nunca tira pontos.
+- `public.app_secret(name)`: lê segredos do Vault; executável apenas por `service_role`.
+- `pg_cron` job `bruceapp-lembretes` a cada 15 min chama a Edge Function `send-reminders` via
+  `pg_net`, com o segredo `cron_secret` do Vault no cabeçalho.
+
+## Edge Functions
+
+| Função           | Para quê                                                     | Autenticação                       |
+| ---------------- | ------------------------------------------------------------ | ---------------------------------- |
+| `food-lookup`    | Código de barras no Open Food Facts, com cache global        | JWT do usuário                     |
+| `bruce-ai`       | Conversa, sugestões e estimativa por foto (Claude Haiku 5.5) | JWT do usuário + limite diário     |
+| `send-reminders` | Lembretes de hábitos e treino por Web Push                   | `x-cron-secret` ou JWT (só teste)  |
+| `delete-account` | Apaga fotos e a conta; o banco apaga o resto em cascata      | JWT do usuário + `confirm=EXCLUIR` |
 
 ## Retenção
 
-Os dados ficam até o usuário apagar. Conversas com a IA terão retenção configurável (padrão
-sugerido de 90 dias) quando existirem. A exclusão da conta apaga tudo em cascata.
+Os dados ficam até o usuário apagar. Conversas com a IA podem ser apagadas na tela do Bruce. A exclusão da conta apaga tudo em cascata.
 
 ## Comandos úteis
 
-- Teste de isolamento: `supabase/tests/rls_test.sql` (ver docs/TESTING.md).
+- Testes no banco: `supabase/tests/rls_test.sql`, `treino_test.sql`, `pontos_test.sql` (ver
+  docs/TESTING.md).
 - Liberar um e-mail para criar conta (SQL Editor, como administrador):
   `insert into app_private.allowed_emails (email) values ('seu@email.com');`

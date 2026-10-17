@@ -4,12 +4,13 @@ Nunca declarar que algo passou sem ter rodado. `npm run check` antes de concluir
 
 ## Camadas
 
-| Camada              | Ferramenta                    | Onde                          | O que cobre                                                                                                        |
-| ------------------- | ----------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Lógica pura         | Vitest                        | `src/**/*.test.ts`            | Datas, semana, grade de consistência; depois nutrição, recordes, pontos                                            |
-| Componentes e rotas | Vitest + Testing Library      | `src/**/*.test.tsx`           | Navegação, estados vazio/carregando/erro, login                                                                    |
-| Ponta a ponta       | Playwright, perfil iPhone 13  | `e2e/`                        | Cada tela abre sem erro e sem rolagem lateral; manifesto PWA; fallback da SPA; capturas em `test-results/screens/` |
-| Banco (RLS)         | SQL contra o projeto Supabase | `supabase/tests/rls_test.sql` | Dono lê e altera o que é seu; outra conta não vê nem altera; filhos não apontam para pais alheios                  |
+| Camada              | Ferramenta                    | Onde                                 | O que cobre                                                                                                        |
+| ------------------- | ----------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| Lógica pura         | Vitest                        | `src/**/*.test.ts`                   | Datas, sequências, nutrição, séries, tendência de peso, níveis e missões, PIN                                      |
+| Componentes e rotas | Vitest + Testing Library      | `src/**/*.test.tsx`                  | Navegação, login, fluxos de hábito/treino/diário, Bruce AI, missões, Perfil, exclusão, PIN                         |
+| Ponta a ponta       | Playwright, perfil iPhone 13  | `e2e/`                               | Cada tela abre sem erro e sem rolagem lateral; manifesto PWA; fallback da SPA; capturas em `test-results/screens/` |
+| Banco (RLS)         | SQL contra o projeto Supabase | `supabase/tests/rls_test.sql`        | Dono lê e altera o que é seu; outra conta não vê nem altera; filhos não apontam para pais alheios                  |
+| Banco (regras)      | SQL contra o projeto Supabase | `treino_test.sql`, `pontos_test.sql` | Recordes ao finalizar sessão (`TREINO_OK`); pontos sem duplicar e revogados ao desfazer (`PONTOS_OK`)              |
 
 ## Como rodar
 
@@ -31,5 +32,9 @@ Itens que só o aparelho real confirma, a refazer a cada fase:
 - [ ] Área segura do topo e da barra inferior (notch e indicador de início)
 - [ ] Login com código recebido por e-mail, dentro do app instalado
 - [ ] Teclado não cobre o campo ativo
-- [ ] (Fase 3) câmera e leitura de código de barras
-- [ ] (Fase 5) notificação push com o app instalado
+- [ ] Câmera e leitura de código de barras em Nutrição
+- [ ] Estimativa por foto (depois de configurar `ANTHROPIC_API_KEY`)
+- [ ] Sessão de treino: cronômetro de descanso e rascunho ao fechar e reabrir o app
+- [ ] Perfil → Ativar lembretes → Enviar teste: a notificação chega com o app fechado
+- [ ] PIN: ativar, fechar o app por mais de 5 minutos e conferir o bloqueio
+- [ ] Exportar dados abre/salva o arquivo JSON

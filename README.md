@@ -7,9 +7,11 @@ Uso pessoal de uma pessoa só. Sem feed, sem seguidores, sem ranking entre usuá
 
 ## Estado atual
 
-Fases 1 e 2 implementadas: base do projeto, navegação, sistema visual, banco no Supabase com RLS
-e login por código enviado ao e-mail. As telas ainda mostram estados vazios; o registro de
-treinos, refeições e hábitos chega na Fase 3.
+Todas as fases (0 a 6) implementadas: login por código, onboarding, hábitos, planos e sessão de
+treino com recordes, diário alimentar com código de barras e estimativa por foto, evolução com
+gráfico e fotos privadas, assistente Bruce AI, missões e pontos, lembretes por notificação, PIN,
+exportação e exclusão de dados. Faltam passos de painel (chave da IA, modelo de e-mail) e a
+validação no iPhone, listados em docs/ROADMAP.md.
 O que está planejado, implementado e validado está em [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Rodar localmente
@@ -39,7 +41,8 @@ com `PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium npm run test:e2e`.
 
 ## Variáveis de ambiente
 
-`.env.production` traz a URL e a chave publishable do Supabase. São valores públicos por natureza
+`.env.production` traz a URL e a chave publishable do Supabase e a chave pública VAPID das
+notificações. São valores públicos por natureza
 (vão para o navegador de qualquer forma; quem protege os dados é o RLS), então ficam versionados
 para facilitar a hospedagem. Para desenvolvimento local, copie-o para `.env.local`.
 Chaves secretas (service role do Supabase, provedor de IA, VAPID privada) ficam apenas como
@@ -57,7 +60,7 @@ cabeçalhos de segurança; em outra hospedagem, replique a CSP e os cabeçalhos 
 - [docs/PRODUCT_SPEC.md](docs/PRODUCT_SPEC.md) — o que o app faz e não faz
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — estrutura e decisões técnicas
 - [docs/DESIGN.md](docs/DESIGN.md) — tokens, tipografia e regras visuais
-- [docs/DATABASE.md](docs/DATABASE.md) — modelo de dados (planejado)
+- [docs/DATABASE.md](docs/DATABASE.md) — modelo de dados, pontos e funções
 - [docs/SECURITY.md](docs/SECURITY.md) — segurança e privacidade
 - [docs/TESTING.md](docs/TESTING.md) — o que é testado e como
 - [docs/ROADMAP.md](docs/ROADMAP.md) — fases, estado e pendências

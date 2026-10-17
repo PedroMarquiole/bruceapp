@@ -33,12 +33,14 @@ src/
   app/          roteamento e casca do app (AppShell, routes)
   routes/       uma tela por arquivo
   ui/           componentes base reutilizáveis (Button, Screen, Section, States, TabBar)
-  lib/          utilitários sem estado (datas; depois supabase, queryClient)
-  features/     auth/ (login e sessão); a partir da Fase 3 <feature>/{api,hooks,schemas,components,domain}
+  lib/          datas, cliente Supabase, queryClient, tipos do banco (db.ts)
+  features/     auth, habits, workouts, nutrition, progress, assistant, gamification, profile,
+                settings — cada uma com queries.ts, componentes e domain/ (funções puras testadas)
   styles/       tokens e camadas CSS
   test/         configuração dos testes
 e2e/            testes Playwright
-supabase/       migrations/ e tests/ (RLS); functions/ a partir da Fase 4
+supabase/       migrations/, tests/ (SQL) e functions/ (Edge Functions em Deno)
+public/push-sw.js  tratamento das notificações, importado pelo service worker do Workbox
 scripts/        utilitários de manutenção (ex.: gerar ícones)
 docs/           esta documentação
 ```
@@ -53,6 +55,8 @@ docs/           esta documentação
   exercício); editar um alimento ou plano não altera o passado.
 - **Integridade no banco.** Pontos, recordes e finalização de sessão passam por funções SQL com
   restrições únicas, não por updates livres do cliente.
+- **Telas sob demanda.** Só Hoje e o login vão no pacote inicial; as outras telas e o leitor de
+  código de barras carregam quando abertas, e as bibliotecas grandes ficam em arquivos próprios.
 - **Provedor de IA trocável.** As Edge Functions isolam o provedor atrás de uma interface; o
   padrão é Claude Haiku 5.5.
 
