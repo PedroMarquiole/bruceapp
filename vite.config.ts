@@ -3,12 +3,34 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { fileURLToPath } from 'node:url'
+import type { Plugin } from 'vite'
 
-export default defineConfig({
+const REAL_CLIENT = fileURLToPath(new URL('./src/lib/supabase.ts', import.meta.url))
+const DEMO_CLIENT = fileURLToPath(new URL('./src/demo/supabaseModule.ts', import.meta.url))
+
+/** Na versão de teste, troca o cliente do Supabase pelo banco em memória. */
+function demoBackend(): Plugin {
+  return {
+    name: 'bruceapp-demo-backend',
+    enforce: 'pre',
+    async resolveId(source, importer, options) {
+      if (!source.endsWith('supabase') || !importer) return null
+      const resolved = await this.resolve(source, importer, { ...options, skipSelf: true })
+      return resolved?.id === REAL_CLIENT ? DEMO_CLIENT : null
+    },
+  }
+}
+
+export default defineConfig(({ mode }) => ({
+  // A versão de teste roda em qualquer pasta (caminhos relativos) e sem service worker.
+  base: mode === 'demo' ? './' : '/',
   plugins: [
     react(),
     tailwindcss(),
+    ...(mode === 'demo' ? [demoBackend()] : []),
     VitePWA({
+      disable: mode === 'demo',
       registerType: 'autoUpdate',
       injectRegister: 'script',
       includeAssets: ['icons/apple-touch-icon.png', 'icons/favicon.svg'],
@@ -47,7 +69,7 @@ export default defineConfig({
     rolldownOptions: {
       output: {
         // Bibliotecas grandes em arquivos próprios: mudam pouco e ficam em cache entre versões.
-        advancedChunks: {
+        codeSplitting: {
           groups: [
             { name: 'supabase', test: /node_modules[\\/]@supabase/ },
             {
@@ -66,4 +88,4 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     css: false,
   },
-})
+}))

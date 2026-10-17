@@ -9,6 +9,8 @@ test-results
 .env.*
 !.env.example
 !.env.production
+!.env.demo
 .netlify
 .DS_Store
 *.log
+dist-demo
