@@ -45,7 +45,7 @@ describe('estados vazios', () => {
       ['/', /Nenhum hábito configurado/],
       ['/nutricao', /Café da manhã/],
       ['/treino', /Nenhum plano criado/],
-      ['/evolucao', /Sem registros de peso/],
+      ['/evolucao', /Sem registros neste período/],
       ['/bruce', /Pergunte sobre os seus treinos/],
     ]
     for (const [path, texto] of casos) {

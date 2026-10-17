@@ -15,7 +15,7 @@
   for = "/*"
   [headers.values]
     # O token da sessão fica no navegador, então a CSP é restrita de propósito.
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://bfhfikboegfrzkhylfwz.supabase.co wss://bfhfikboegfrzkhylfwz.supabase.co; media-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://bfhfikboegfrzkhylfwz.supabase.co; font-src 'self'; connect-src 'self' https://bfhfikboegfrzkhylfwz.supabase.co wss://bfhfikboegfrzkhylfwz.supabase.co; media-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     Referrer-Policy = "no-referrer"
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "DENY"
