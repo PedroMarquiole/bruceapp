@@ -1,16 +1,51 @@
+import { useState } from 'react'
 import { Link } from 'react-router'
-import { ChevronRight, KeyRound, Palette } from 'lucide-react'
+import { ChevronRight, LogOut, Palette } from 'lucide-react'
 import { Screen, Section } from '../ui/Screen'
-import { EmptyState } from '../ui/States'
+import { Button } from '../ui/Button'
+import { useAuth } from '../features/auth/auth-context'
 
 export function Perfil() {
+  const { state, signOut } = useAuth()
+  const [leaving, setLeaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const email = state.status === 'logado' ? state.session.user.email : undefined
+
+  async function onSignOut() {
+    setLeaving(true)
+    setError(null)
+    try {
+      await signOut()
+    } catch {
+      setError('Não foi possível sair agora. Confira a internet e tente de novo.')
+      setLeaving(false)
+    }
+  }
+
   return (
     <Screen title="Perfil" backTo="/">
       <Section title="Conta">
-        <EmptyState icon={<KeyRound className="size-5" />} title="Login ainda não configurado">
-          Na próxima etapa você entra com um código enviado ao seu e-mail. Metas, notificações,
-          exportação e exclusão de dados ficam aqui.
-        </EmptyState>
+        <dl className="mt-3">
+          <dt className="text-small text-ink-muted">E-mail de acesso</dt>
+          <dd className="mt-0.5 break-all text-ink">{email ?? '—'}</dd>
+        </dl>
+        <p className="mt-4 max-w-prose text-small text-ink-muted">
+          Metas, notificações, exportação e exclusão de dados chegam nas próximas etapas.
+        </p>
+        <Button
+          variant="secondary"
+          className="mt-5"
+          icon={<LogOut aria-hidden className="size-4" />}
+          busy={leaving}
+          onClick={onSignOut}
+        >
+          Sair
+        </Button>
+        {error ? (
+          <p role="alert" className="mt-3 text-small text-danger">
+            {error}
+          </p>
+        ) : null}
       </Section>
       <Section title="Aparência">
         <Link

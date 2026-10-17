@@ -21,7 +21,7 @@ servidor.
 | Ícones                     | lucide-react                                                   | Implementado       |
 | PWA                        | vite-plugin-pwa (Workbox), atualização automática              | Implementado       |
 | Testes                     | Vitest + Testing Library; Playwright em viewport de iPhone     | Implementado       |
-| Dados remotos              | @supabase/supabase-js + TanStack Query + Zod                   | Planejado (Fase 2) |
+| Dados remotos              | @supabase/supabase-js + TanStack Query + Zod                   | Implementado       |
 | Gráficos                   | Recharts                                                       | Planejado (Fase 4) |
 | Código de barras           | @zxing/browser                                                 | Planejado (Fase 3) |
 | Rascunho offline do treino | IndexedDB (Dexie)                                              | Planejado (Fase 3) |
@@ -34,11 +34,11 @@ src/
   routes/       uma tela por arquivo
   ui/           componentes base reutilizáveis (Button, Screen, Section, States, TabBar)
   lib/          utilitários sem estado (datas; depois supabase, queryClient)
-  features/     (a partir da Fase 3) <feature>/{api,hooks,schemas,components,domain}
+  features/     auth/ (login e sessão); a partir da Fase 3 <feature>/{api,hooks,schemas,components,domain}
   styles/       tokens e camadas CSS
   test/         configuração dos testes
 e2e/            testes Playwright
-supabase/       (Fase 2) migrations, functions, testes de RLS
+supabase/       migrations/ e tests/ (RLS); functions/ a partir da Fase 4
 scripts/        utilitários de manutenção (ex.: gerar ícones)
 docs/           esta documentação
 ```

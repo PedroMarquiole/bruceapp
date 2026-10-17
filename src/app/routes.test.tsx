@@ -1,14 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { createMemoryRouter, RouterProvider } from 'react-router'
-import { routes } from './routes'
+import { renderRoute } from '../test/render'
+import { fakeAuth } from '../test/auth'
 
-function renderAt(path: string) {
-  const router = createMemoryRouter(routes, { initialEntries: [path] })
-  render(<RouterProvider router={router} />)
-  return router
-}
+const renderAt = (path: string) => renderRoute(path).router
 
 describe('navegação principal', () => {
   it('abre em Hoje com as cinco abas', () => {
@@ -53,11 +49,31 @@ describe('estados vazios', () => {
       ['/bruce', /ainda não está ligado/],
     ]
     for (const [path, texto] of casos) {
-      const { unmount } = render(
-        <RouterProvider router={createMemoryRouter(routes, { initialEntries: [path] })} />,
-      )
+      const { unmount } = renderRoute(path)
       expect(screen.getByText(texto)).toBeInTheDocument()
       unmount()
     }
+  })
+})
+
+describe('acesso', () => {
+  it('sem sessão, mostra a tela de entrada em vez do app', () => {
+    renderRoute('/treino', fakeAuth({ status: 'deslogado' }))
+    expect(screen.getByRole('heading', { level: 1, name: 'Entrar' })).toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: 'Navegação principal' })).toBeNull()
+  })
+
+  it('sem configuração, explica quais variáveis faltam', () => {
+    renderRoute('/', fakeAuth({ status: 'sem-config', missing: ['VITE_SUPABASE_URL'] }))
+    expect(screen.getByRole('heading', { name: 'Configuração ausente' })).toBeInTheDocument()
+    expect(screen.getByText('VITE_SUPABASE_URL')).toBeInTheDocument()
+  })
+
+  it('perfil mostra o e-mail da conta e permite sair', async () => {
+    const user = userEvent.setup()
+    const { api } = renderRoute('/perfil')
+    expect(screen.getByText('eu@teste.invalid')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Sair' }))
+    expect(api.signOut).toHaveBeenCalledOnce()
   })
 })

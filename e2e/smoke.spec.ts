@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './fixtures'
 
 const telas = [
   { path: '/', heading: null, nome: 'hoje' },
@@ -11,7 +11,7 @@ const telas = [
 ] as const
 
 for (const tela of telas) {
-  test(`tela ${tela.nome} abre sem rolagem horizontal`, async ({ page }) => {
+  test(`tela ${tela.nome} abre sem rolagem horizontal`, async ({ loggedIn: page }) => {
     const erros: string[] = []
     page.on('pageerror', (e) => erros.push(e.message))
     await page.goto(tela.path)
@@ -40,7 +40,9 @@ test('manifesto do PWA está publicado', async ({ request }) => {
   expect(manifest.display).toBe('standalone')
 })
 
-test('rota desconhecida cai no index (SPA) e mostra a tela de não encontrado', async ({ page }) => {
+test('rota desconhecida cai no index (SPA) e mostra a tela de não encontrado', async ({
+  loggedIn: page,
+}) => {
   await page.goto('/qualquer-coisa')
   await expect(page.getByRole('heading', { name: 'Tela não encontrada' })).toBeVisible()
 })

@@ -7,8 +7,9 @@ Uso pessoal de uma pessoa só. Sem feed, sem seguidores, sem ranking entre usuá
 
 ## Estado atual
 
-Fase 1 (fundação) concluída: base do projeto, navegação, sistema visual e verificações.
-Nada de dados reais ainda — as telas mostram estados vazios explicando o que virá.
+Fases 1 e 2 implementadas: base do projeto, navegação, sistema visual, banco no Supabase com RLS
+e login por código enviado ao e-mail. As telas ainda mostram estados vazios; o registro de
+treinos, refeições e hábitos chega na Fase 3.
 O que está planejado, implementado e validado está em [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Rodar localmente
@@ -38,14 +39,17 @@ com `PLAYWRIGHT_CHROMIUM_PATH=/opt/pw-browsers/chromium npm run test:e2e`.
 
 ## Variáveis de ambiente
 
-Copie `.env.example` para `.env.local` e preencha. Valores reais nunca são versionados.
+`.env.production` traz a URL e a chave publishable do Supabase. São valores públicos por natureza
+(vão para o navegador de qualquer forma; quem protege os dados é o RLS), então ficam versionados
+para facilitar a hospedagem. Para desenvolvimento local, copie-o para `.env.local`.
 Chaves secretas (service role do Supabase, provedor de IA, VAPID privada) ficam apenas como
 segredos das Edge Functions, nunca no código do site.
 
 ## Publicação
 
-O Netlify constrói a partir de `netlify.toml` e publica `dist/`. O deploy acontece a cada envio
-para o GitHub. Para instalar no iPhone: abra o site no Safari, toque em Compartilhar e em
+Qualquer hospedagem de arquivos estáticos serve: rode `npm run build` e publique `dist/`, com
+todas as rotas redirecionando para `index.html`. No Netlify, `netlify.toml` já faz isso e aplica os
+cabeçalhos de segurança; em outra hospedagem, replique a CSP e os cabeçalhos desse arquivo. Para instalar no iPhone: abra o site no Safari, toque em Compartilhar e em
 "Adicionar à Tela de Início". Lembretes por notificação só funcionam com o app instalado assim.
 
 ## Documentação
