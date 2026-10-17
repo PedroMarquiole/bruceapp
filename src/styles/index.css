@@ -1,0 +1,147 @@
+@import '@fontsource-variable/archivo/wdth.css';
+@import 'tailwindcss';
+
+/*
+ * Tokens do Bruceapp — fonte única de cores, tipografia e espaçamento.
+ * Paleta definida no briefing; derivados documentados em docs/DESIGN.md.
+ */
+@theme {
+  --color-obsidian: #090a0d; /* fundo */
+  --color-graphite: #17191f; /* superfícies */
+  --color-graphite-raised: #1f2229; /* superfície pressionada / campo */
+  --color-line: #2a2d35; /* fios e divisórias */
+  --color-signal: #f2c94c; /* ações principais, progresso, foco */
+  --color-signal-press: #d8b03c;
+  --color-steel: #a7adb8; /* ícones e detalhes metálicos */
+  --color-ink: #f5f6f8; /* texto principal */
+  --color-ink-muted: #8d95a3; /* texto secundário */
+  --color-danger: #ef7c6b; /* erro — nunca amarelo */
+  --color-ok: #7cc5a8; /* sucesso — nunca amarelo */
+
+  --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* Escala tipográfica (razão ~1.25) */
+  --text-micro: 0.6875rem; /* 11px — rótulos da barra de abas */
+  --text-small: 0.8125rem; /* 13px */
+  --text-body: 1rem; /* 16px */
+  --text-lead: 1.1875rem; /* 19px */
+  --text-title: 1.5rem; /* 24px */
+  --text-headline: 2.5rem; /* 40px — título de tela, condensado */
+  --text-monument: 4.75rem; /* 76px — dia da semana na tela Hoje */
+
+  --radius-control: 0.75rem;
+  --radius-panel: 1.25rem;
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    background-color: var(--color-obsidian);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    min-height: 100dvh;
+    font-size: var(--text-body);
+    line-height: 1.5;
+    font-feature-settings: 'tnum' 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-signal);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: var(--color-signal);
+    color: var(--color-obsidian);
+  }
+}
+
+@layer components {
+  /* Títulos condensados: a voz do app. */
+  .type-headline {
+    font-size: var(--text-headline);
+    font-stretch: 72%;
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+  }
+
+  .type-monument {
+    font-size: var(--text-monument);
+    font-stretch: 64%;
+    font-weight: 850;
+    line-height: 0.85;
+    letter-spacing: -0.015em;
+  }
+
+  .type-section {
+    font-size: var(--text-lead);
+    font-stretch: 88%;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .safe-top {
+    padding-top: max(env(safe-area-inset-top), 1rem);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      100deg,
+      var(--color-graphite) 30%,
+      var(--color-graphite-raised) 50%,
+      var(--color-graphite) 70%
+    );
+    background-size: 300% 100%;
+    animation: skeleton-sweep 1.6s linear infinite;
+  }
+
+  .reveal-monument {
+    animation: monument-in 700ms var(--ease-out-quint) both;
+  }
+}
+
+@keyframes skeleton-sweep {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@keyframes monument-in {
+  from {
+    opacity: 0;
+    font-stretch: 100%;
+    letter-spacing: 0.04em;
+  }
+  to {
+    opacity: 1;
+    font-stretch: 64%;
+    letter-spacing: -0.015em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
