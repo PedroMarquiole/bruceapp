@@ -4,17 +4,30 @@
  */
 const KEY = 'bruce.pin'
 const UNLOCK = 'bruce.unlocked-at'
+const FAILS = 'bruce.pin-fails'
 const ITERATIONS = 150_000
 export const RELOCK_MS = 5 * 60_000
 
 type Stored = { salt: string; hash: string }
 
+const CORRUPT: Stored = { salt: '', hash: '' }
+
+/** null = sem PIN. Valor ilegível conta como PIN que nunca confere (não destrava sozinho). */
 function read(): Stored | null {
+  let raw: string | null
   try {
-    const raw = localStorage.getItem(KEY)
-    return raw ? (JSON.parse(raw) as Stored) : null
+    raw = localStorage.getItem(KEY)
   } catch {
     return null
+  }
+  if (!raw) return null
+  try {
+    const v = JSON.parse(raw) as Partial<Stored>
+    return typeof v.salt === 'string' && typeof v.hash === 'string' && v.salt && v.hash
+      ? { salt: v.salt, hash: v.hash }
+      : CORRUPT
+  } catch {
+    return CORRUPT
   }
 }
 
@@ -50,11 +63,35 @@ export async function setPin(pin: string): Promise<void> {
 export async function verifyPin(pin: string): Promise<boolean> {
   const s = read()
   if (!s) return true
+  if (s === CORRUPT || !isValidPin(pin)) return false
   return (await hashPin(pin, s.salt)) === s.hash
+}
+
+/** Espera crescente depois de erros seguidos: 0, 0, 0, 2 s, 4 s, 8 s… até 60 s. */
+export function failureDelayMs(failures: number): number {
+  return failures < 3 ? 0 : Math.min(60_000, 1000 * 2 ** (failures - 2))
+}
+
+export function failures(): number {
+  try {
+    return Number(localStorage.getItem(FAILS) ?? 0) || 0
+  } catch {
+    return 0
+  }
+}
+
+export function setFailures(n: number): void {
+  try {
+    if (n > 0) localStorage.setItem(FAILS, String(n))
+    else localStorage.removeItem(FAILS)
+  } catch {
+    /* ignora */
+  }
 }
 
 export function clearPin(): void {
   try {
+    localStorage.removeItem(FAILS)
     localStorage.removeItem(KEY)
     sessionStorage.removeItem(UNLOCK)
   } catch {

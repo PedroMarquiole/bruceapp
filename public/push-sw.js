@@ -20,7 +20,14 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
-  const url = (event.notification.data && event.notification.data.url) || '/'
+  // Só abre endereços do próprio app.
+  let url = '/'
+  try {
+    const target = new URL((event.notification.data && event.notification.data.url) || '/', self.location.origin)
+    if (target.origin === self.location.origin) url = target.pathname + target.search + target.hash
+  } catch {
+    url = '/'
+  }
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
       for (const client of list) {

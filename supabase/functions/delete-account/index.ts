@@ -13,13 +13,15 @@ Deno.serve(async (req) => {
   if (body?.confirm !== 'EXCLUIR') return json({ error: 'Confirmação ausente' }, 400)
 
   const admin = adminClient()
-  // Fotos de progresso: tudo dentro da pasta do usuário.
-  for (;;) {
-    const { data: files, error } = await admin.storage
+  // Fotos de progresso: arquivos (não pastas) dentro da pasta do usuário, em rodadas limitadas.
+  for (let round = 0; ; round++) {
+    if (round >= 50) return json({ error: 'Não foi possível apagar os arquivos.' }, 500)
+    const { data: entries, error } = await admin.storage
       .from('progress-photos')
       .list(user.id, { limit: 100 })
     if (error) return json({ error: 'Não foi possível apagar os arquivos.' }, 500)
-    if (!files?.length) break
+    const files = (entries ?? []).filter((f) => f.id !== null)
+    if (!files.length) break
     const rm = await admin.storage
       .from('progress-photos')
       .remove(files.map((f) => `${user.id}/${f.name}`))

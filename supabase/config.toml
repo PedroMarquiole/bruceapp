@@ -1,0 +1,16 @@
+# Configuração das Edge Functions usada pelo `supabase functions deploy`.
+project_id = "bfhfikboegfrzkhylfwz"
+
+# Chamada pelo pg_cron sem token de usuário: a própria função confere o cabeçalho
+# x-cron-secret (comparação em tempo constante) ou o JWT do usuário no envio de teste.
+[functions.send-reminders]
+verify_jwt = false
+
+[functions.food-lookup]
+verify_jwt = true
+
+[functions.bruce-ai]
+verify_jwt = true
+
+[functions.delete-account]
+verify_jwt = true

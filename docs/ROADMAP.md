@@ -22,8 +22,10 @@ Nada aqui exige mexer em código. São passos de painel que dependem da sua cont
       funciona normalmente.
 - [ ] Supabase → Authentication → Email Templates: incluir `{{ .Token }}` nos modelos **Magic
       link** e **Confirm signup**, para o e-mail trazer o código de 6 dígitos.
-- [ ] Rodar `supabase/tests/rls_test.sql` completo no SQL Editor e conferir `RLS_OK`. A parte sem
-      exclusões já foi conferida; a parte com DELETE pede confirmação manual.
+- [ ] Rodar no SQL Editor `supabase/tests/rls_test.sql` (espera `RLS_OK`) e `treino_test.sql`
+      (espera `TREINO_OK`) completos. As partes sem DELETE já foram conferidas; as com DELETE
+      pedem confirmação manual.
+- [ ] Opcional: definir um limite de gasto na chave da Anthropic (Console → Limits).
 - [ ] GitHub: deixar o repositório privado (Settings → General → Danger Zone).
 - [ ] Hospedagem: publicar `dist/` com o redirecionamento da SPA e os cabeçalhos de
       `netlify.toml` (no Netlify isso é automático).

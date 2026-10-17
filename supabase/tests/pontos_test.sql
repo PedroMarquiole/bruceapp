@@ -44,6 +44,25 @@ begin
   exception when insufficient_privilege then null;
   end;
 
+  -- Revisão de segurança: recorde inserido à mão e sessão criada já finalizada são recusados.
+  begin
+    insert into public.personal_records (exercise_name, criterion, value, achieved_on)
+      values ('Supino', 'carga_1', 500, current_date);
+    raise exception 'FALHA: usuário criou recorde direto';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    insert into public.workout_sessions (title, status, finished_at) values ('B', 'finalizada', now());
+    raise exception 'FALHA: criou sessão já finalizada';
+  exception when check_violation then null;
+  end;
+
+  -- Mudar o dia de um registro de hábito tira os pontos do dia antigo.
+  update public.habit_logs set count = 3 where habit_id = h;
+  update public.habit_logs set day = current_date - 1 where habit_id = h;
+  select count(*) into n from public.points_ledger where rule = 'habito';
+  if n <> 1 then raise exception 'FALHA: mudar o dia duplicou pontos de hábito (%)', n; end if;
+
   execute 'reset role';
   raise exception 'PONTOS_OK';
 end;

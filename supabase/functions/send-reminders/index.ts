@@ -27,6 +27,38 @@ function spNow() {
   }
 }
 
+const PUSH_HOSTS = [
+  /^fcm\.googleapis\.com$/,
+  /^android\.googleapis\.com$/,
+  /(^|\.)push\.apple\.com$/,
+  /^updates\.push\.services\.mozilla\.com$/,
+  /(^|\.)notify\.windows\.com$/,
+]
+
+function isPushService(endpoint: string): boolean {
+  try {
+    const u = new URL(endpoint)
+    return u.protocol === 'https:' && PUSH_HOSTS.some((r) => r.test(u.hostname))
+  } catch {
+    return false
+  }
+}
+
+/** Comparação em tempo constante (compara os hashes, que têm sempre o mesmo tamanho). */
+async function safeEqual(a: string | null, b: string | null): Promise<boolean> {
+  if (!a || !b) return false
+  const enc = new TextEncoder()
+  const [ha, hb] = await Promise.all([
+    crypto.subtle.digest('SHA-256', enc.encode(a)),
+    crypto.subtle.digest('SHA-256', enc.encode(b)),
+  ])
+  const x = new Uint8Array(ha)
+  const y = new Uint8Array(hb)
+  let diff = 0
+  for (let i = 0; i < x.length; i++) diff |= (x[i] ?? 0) ^ (y[i] ?? 0)
+  return diff === 0
+}
+
 const toMinutes = (t: string) => {
   const [h = '0', m = '0'] = t.split(':')
   return Number(h) * 60 + Number(m)
@@ -37,10 +69,22 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'Método não permitido' }, 405)
 
   const admin = adminClient()
-  const [{ data: priv }, { data: pub }, { data: cronSecret }] = await Promise.all([
+
+  // 1) Quem chama? O cron (cabeçalho com segredo) ou o próprio usuário logado (envio de teste).
+  //    Nada mais é lido antes disso.
+  const { data: cronSecret } = await admin.rpc('app_secret', { p_name: 'cron_secret' })
+  const isCron = await safeEqual(req.headers.get('x-cron-secret'), cronSecret as string | null)
+  let testUserId: string | null = null
+  if (!isCron) {
+    const { user } = await requireUser(req)
+    if (!user) return json({ error: 'Não autenticado' }, 401)
+    testUserId = user.id
+  }
+
+  // 2) Só então carrega as chaves de envio.
+  const [{ data: priv }, { data: pub }] = await Promise.all([
     admin.rpc('app_secret', { p_name: 'vapid_private_key' }),
     admin.rpc('app_secret', { p_name: 'vapid_public_key' }),
-    admin.rpc('app_secret', { p_name: 'cron_secret' }),
   ])
   if (!priv || !pub) return json({ error: 'Chaves de notificação não configuradas' }, 503)
   webpush.setVapidDetails(SUBJECT, pub as string, priv as string)
@@ -49,6 +93,8 @@ Deno.serve(async (req) => {
     sub: Sub,
     payload: { title: string; body: string; url: string; tag: string },
   ) {
+    // Só envia para serviços de push conhecidos (nunca para um endereço qualquer).
+    if (!isPushService(sub.endpoint)) return false
     try {
       await webpush.sendNotification(
         { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
@@ -66,11 +112,8 @@ Deno.serve(async (req) => {
   }
 
   // Envio de teste pedido pelo usuário.
-  const isCron = cronSecret && req.headers.get('x-cron-secret') === cronSecret
-  if (!isCron) {
-    const { user } = await requireUser(req)
-    if (!user) return json({ error: 'Não autenticado' }, 401)
-    const { data: subs } = await admin.from('push_subscriptions').select('*').eq('user_id', user.id)
+  if (testUserId) {
+    const { data: subs } = await admin.from('push_subscriptions').select('*').eq('user_id', testUserId)
     let ok = 0
     for (const s of (subs ?? []) as Sub[]) {
       if (

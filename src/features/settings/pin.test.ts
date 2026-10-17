@@ -1,5 +1,14 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { clearPin, hasPin, isValidPin, needsUnlock, RELOCK_MS, setPin, verifyPin } from './pin'
+import {
+  clearPin,
+  failureDelayMs,
+  hasPin,
+  isValidPin,
+  needsUnlock,
+  RELOCK_MS,
+  setPin,
+  verifyPin,
+} from './pin'
 
 afterEach(() => clearPin())
 
@@ -27,5 +36,18 @@ describe('PIN local', () => {
 
   it('sem PIN, nunca bloqueia', () => {
     expect(needsUnlock()).toBe(false)
+  })
+
+  it('valor corrompido nunca destrava sozinho', async () => {
+    localStorage.setItem('bruce.pin', '{quebrado')
+    expect(hasPin()).toBe(true)
+    expect(await verifyPin('1234')).toBe(false)
+  })
+
+  it('espera cresce depois de erros seguidos', () => {
+    expect(failureDelayMs(2)).toBe(0)
+    expect(failureDelayMs(3)).toBe(2000)
+    expect(failureDelayMs(4)).toBe(4000)
+    expect(failureDelayMs(20)).toBe(60_000)
   })
 })

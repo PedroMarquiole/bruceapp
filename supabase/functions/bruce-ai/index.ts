@@ -202,11 +202,6 @@ async function callModel(apiKey: string, messages: Msg[], schema: unknown, maxTo
   return { usage, data, refusal: false }
 }
 
-function startOfTodaySaoPaulo(): string {
-  const day = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date())
-  return `${day}T00:00:00-03:00`
-}
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (req.method !== 'POST') return json({ error: 'Método não permitido' }, 405)
@@ -225,12 +220,16 @@ Deno.serve(async (req) => {
   }
 
   const admin = adminClient()
-  const { count } = await admin
-    .from('ai_usage')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .gte('created_at', startOfTodaySaoPaulo())
-  if ((count ?? 0) >= DAILY_LIMIT) {
+  // Reserva a linha de uso antes de chamar o modelo (trava por usuário no banco): pedidos em
+  // paralelo não furam o limite, e uma chamada que falhe no meio continua contando.
+  const { data: usageId, error: reserveError } = await admin.rpc('reserve_ai_usage', {
+    p_user: user.id,
+    p_intent: body.intent,
+    p_model: MODEL,
+    p_limit: DAILY_LIMIT,
+  })
+  if (reserveError) return json({ error: 'Não foi possível registrar o uso agora.' }, 503)
+  if (!usageId) {
     return json(
       {
         error: `Limite de ${DAILY_LIMIT} pedidos por dia atingido. Volta amanhã.`,
@@ -241,15 +240,15 @@ Deno.serve(async (req) => {
   }
 
   const logUsage = (usage: { input: number; output: number }, ok: boolean) =>
-    admin.from('ai_usage').insert({
-      user_id: user.id,
-      intent: body.intent,
-      model: MODEL,
-      input_tokens: usage.input,
-      output_tokens: usage.output,
-      cost_usd: (usage.input * PRICE_IN + usage.output * PRICE_OUT) / 1_000_000,
-      ok,
-    })
+    admin
+      .from('ai_usage')
+      .update({
+        input_tokens: usage.input,
+        output_tokens: usage.output,
+        cost_usd: (usage.input * PRICE_IN + usage.output * PRICE_OUT) / 1_000_000,
+        ok,
+      })
+      .eq('id', usageId as string)
 
   try {
     if (body.intent === 'estimativa_foto') {
