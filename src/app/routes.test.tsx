@@ -40,17 +40,17 @@ describe('navegação principal', () => {
 })
 
 describe('estados vazios', () => {
-  it('cada aba mostra um estado vazio explicando o que vai aparecer', () => {
+  it('cada aba mostra um estado vazio explicando o que vai aparecer', async () => {
     const casos: Array<[string, RegExp]> = [
-      ['/', /Nada registrado ainda/],
-      ['/nutricao', /Nenhuma refeição registrada/],
+      ['/', /Nenhum hábito configurado/],
+      ['/nutricao', /Café da manhã/],
       ['/treino', /Nenhum plano criado/],
       ['/evolucao', /Sem registros de peso/],
-      ['/bruce', /ainda não está ligado/],
+      ['/bruce', /Pergunte sobre os seus treinos/],
     ]
     for (const [path, texto] of casos) {
       const { unmount } = renderRoute(path)
-      expect(screen.getByText(texto)).toBeInTheDocument()
+      expect(await screen.findByText(texto)).toBeInTheDocument()
       unmount()
     }
   })

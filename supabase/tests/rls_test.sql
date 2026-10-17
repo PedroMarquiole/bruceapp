@@ -82,7 +82,7 @@ begin
 
   -- B não consegue pendurar um registro seu no hábito de A (chave composta).
   begin
-    insert into public.habit_logs (habit_id, day) values (habit_a, current_date);
+    insert into public.habit_logs (habit_id, day) values (habit_a, current_date - 1);
     raise exception 'FALHA: B registrou no hábito de A';
   exception when foreign_key_violation then null;
   end;

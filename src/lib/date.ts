@@ -108,3 +108,15 @@ export function recentMondays(today: Date, weeks: number): Date[] {
       new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() - (weeks - 1 - i) * 7),
   )
 }
+
+/** Converte "AAAA-MM-DD" em data local (meia-noite). */
+export function parseDayKey(key: string): Date {
+  const [y = 1970, m = 1, d = 1] = key.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
+/** Soma dias a uma chave de dia. */
+export function shiftDayKey(key: string, delta: number): string {
+  const d = parseDayKey(key)
+  return localDayKey(new Date(d.getFullYear(), d.getMonth(), d.getDate() + delta))
+}

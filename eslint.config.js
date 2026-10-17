@@ -5,7 +5,17 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist', 'dev-dist', 'coverage', 'playwright-report', 'test-results'] },
+  // supabase/functions roda em Deno, com lint e tipos próprios.
+  {
+    ignores: [
+      'dist',
+      'dev-dist',
+      'coverage',
+      'playwright-report',
+      'test-results',
+      'supabase/functions',
+    ],
+  },
   {
     files: ['**/*.{ts,tsx}'],
     extends: [js.configs.recommended, ...tseslint.configs.strict],
